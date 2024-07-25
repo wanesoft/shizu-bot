@@ -1,5 +1,5 @@
 from aiogram.types import KeyboardButton
-from consts import *
+from bot.shizhu.consts import *
 
 def main_menu():
     return [
@@ -17,4 +17,5 @@ def pay_wall():
     return [
         [KeyboardButton(text=BUTTON_BUY_GENS), KeyboardButton(text=BUTTON_BUY_SUBS)],
         [KeyboardButton(text=BUTTON_REFERRAL), KeyboardButton(text=BUTTON_EARN_GENS)],
+        [KeyboardButton(text=BUTTON_HOME)],
     ]

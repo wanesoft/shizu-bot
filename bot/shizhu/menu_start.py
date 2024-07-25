@@ -1,30 +1,23 @@
-import asyncio
-import logging
-import sys
-import asyncio
-from os import getenv
+import json
 
-from aiogram import Bot, Dispatcher, html
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart, StateFilter, Command
-from aiogram.types import Message, ReplyKeyboardMarkup, InlineKeyboardButton, input_file
-from aiogram.fsm.storage.mongo import MongoStorage
-from aiogram.fsm.state import StatesGroup, State
+from aiogram.filters import CommandStart, CommandObject
+from aiogram.types import Message, ReplyKeyboardMarkup
 from aiogram.fsm.context import FSMContext
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram import F
-import motor.motor_asyncio
 
 from bot.shizhu import buttons
 from bot.shizhu.consts import *
 from bot.ai_bot import AiBot
 from bot.shizhu.state import DialogStates
 from bot.utils.string_utils import generate_hex_string
+from storage.storage import s
+from storage.entities import *
 
 
 @AiBot.dp.message(CommandStart())
-async def command_start_handler(message: Message, state: FSMContext) -> None:
+async def command_start_handler(message: Message, command: CommandObject, state: FSMContext) -> None:
+    args = command.args
+    await message.answer(f"Your payload: {args}")
+
     kb = buttons.main_menu()
     keyboard = ReplyKeyboardMarkup(
         keyboard=kb,
@@ -35,9 +28,22 @@ async def command_start_handler(message: Message, state: FSMContext) -> None:
     await message.answer(HELLO_MESSAGE, parse_mode='HTML', reply_markup=keyboard)
 
     await state.set_state(DialogStates.main_menu)
-    await state.update_data(user=message.chat.username)
-    await state.update_data(name=message.chat.full_name)
     data = await state.get_data()
-    if data.get("ref_id") is None:
-        await state.update_data(ref_id=generate_hex_string())
-        await state.update_data(balance=int(5))
+    if not data:
+        ref_id = generate_hex_string()
+        await s.create_refinfo_by_ref_id(ref_id, message.chat.id)
+        new_user = User.from_message(message, ref_id)
+        await state.update_data(user=new_user.model_dump())
+
+
+
+
+
+
+        # user = await s.get_refinfo_by_ref_id(ref_id)
+
+        # data = await state.get_data()
+        # us = data['user']
+        # uu = User.model_validate(us)
+        # uu.fullname = "ebalo"
+        # await state.update_data(user=uu.model_dump())

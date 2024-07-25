@@ -1,27 +1,13 @@
-import asyncio
-import logging
-import sys
-import asyncio
-from os import getenv
-
-from aiogram import Bot, Dispatcher, html
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart, StateFilter, Command
-from aiogram.types import Message, ReplyKeyboardMarkup, InlineKeyboardButton, input_file
-from aiogram.fsm.storage.mongo import MongoStorage
-from aiogram.fsm.state import StatesGroup, State
+from aiogram.types import Message, ReplyKeyboardMarkup
 from aiogram.fsm.context import FSMContext
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import F
-import motor.motor_asyncio
 
 from bot.shizhu import buttons
 from bot.shizhu.consts import *
 from bot.ai_bot import AiBot
 from bot.shizhu.state import DialogStates
-from bot.utils.string_utils import generate_hex_string
-
+from storage.entities import *
+from storage.storage import s
 
 @AiBot.dp.message(F.text == BUTTON_BALANCE)
 async def command_balance_handler(message: Message, state: FSMContext) -> None:
@@ -33,5 +19,13 @@ async def command_balance_handler(message: Message, state: FSMContext) -> None:
     )
 
     data = await state.get_data()
-    await message.answer(f"Доступно генераций: {data['balance']}", parse_mode='HTML', reply_markup=keyboard)
+    user = User.model_validate(data["user"])
+    await message.answer(f"Доступно генераций: {user.balance}", parse_mode='HTML', reply_markup=keyboard)
+
+    ref_info = await s.get_refinfo_by_ref_id(user.ref_id)
+    ref_info.balance_from_link += 1
+    await s.update_refinfo_by_ref_id(user.ref_id, ref_info)
+
+    await message.answer(f"Баланс за рефералку увеличен на: {ref_info.balance_from_link}", parse_mode='HTML', reply_markup=keyboard)
+
     await state.set_state(DialogStates.main_menu)
