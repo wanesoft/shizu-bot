@@ -18,8 +18,7 @@ async def command_balance_handler(message: Message, state: FSMContext) -> None:
         input_field_placeholder="рандомный плейсхолдер"
     )
 
-    data = await state.get_data()
-    user = User.model_validate(data["user"])
+    user = await s.get_user_by_id(message.chat.id)
     await message.answer(f"Доступно генераций: {user.balance}", parse_mode='HTML', reply_markup=keyboard)
 
     ref_info = await s.get_refinfo_by_ref_id(user.ref_id)

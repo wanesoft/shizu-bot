@@ -28,18 +28,23 @@ async def command_start_handler(message: Message, command: CommandObject, state:
     await message.answer(HELLO_MESSAGE, parse_mode='HTML', reply_markup=keyboard)
 
     await state.set_state(DialogStates.main_menu)
-    data = await state.get_data()
+    data = await s.get_user_by_id(message.chat.id)
     if not data:
         ref_id = generate_hex_string()
         await s.create_refinfo_by_ref_id(ref_id, message.chat.id)
         new_user = User.from_message(message, ref_id)
-        await state.update_data(user=new_user.model_dump())
+        await s.create_user(new_user)
+        u = await s.get_user_by_id(new_user.id)
+        u.fullname = message.chat.full_name
+        await s.update_user(u)
 
 
 
 
 
-
+        # u = await s.get_user_by_id(new_user.id)
+        # u.fullname = "fsdfsdfdsf"
+        # await s.update_user(u)
         # user = await s.get_refinfo_by_ref_id(ref_id)
 
         # data = await state.get_data()
