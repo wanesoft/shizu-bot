@@ -16,7 +16,6 @@ from storage.entities import *
 @AiBot.dp.message(CommandStart())
 async def command_start_handler(message: Message, command: CommandObject, state: FSMContext) -> None:
     args = command.args
-    await message.answer(f"Your payload: {args}")
 
     kb = buttons.main_menu()
     keyboard = ReplyKeyboardMarkup(
@@ -37,6 +36,14 @@ async def command_start_handler(message: Message, command: CommandObject, state:
         u = await s.get_user_by_id(new_user.id)
         u.fullname = message.chat.full_name
         await s.update_user(u)
+
+        if args:
+            friend_ref_info = await s.get_refinfo_by_ref_id(args)
+            if friend_ref_info:
+                await AiBot.bot.send_message(friend_ref_info.user_id, "Ваш друг добавился по реферальной ссылке. +2 генерации на баланс")
+                friend_user = await s.get_user_by_id(friend_ref_info.user_id)
+                friend_user.balance += 2
+                await s.update_user(friend_user)
 
 
 

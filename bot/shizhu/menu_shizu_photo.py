@@ -18,7 +18,8 @@ async def emulate_request_to_father(chat_id, file):
     print(chat_id)
     await asyncio.sleep(15)
     file = input_file.FSInputFile(file)
-    await AiBot.bot.send_photo(chat_id=chat_id, photo=file, caption=ALIVE_PHOTO_DONE)
+    user = await s.get_user_by_id(chat_id)
+    await AiBot.bot.send_photo(chat_id=chat_id, photo=file, caption=wrap_ref_link(user.ref_id))
 
 
 @AiBot.dp.message(F.text == BUTTON_ALIVE_SHIZUFACE)

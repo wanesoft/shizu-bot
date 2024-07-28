@@ -25,7 +25,7 @@ ALIVE_PHOTO_DONE = """
 <a href="http://www.example.com/">Попробуй сделать свою SHIZU</a>
 """
 def wrap_ref_link(ref_id):
-    return f'Ваше анимированное фото готово! Вот результат. 🤗\n<a href="https://t.me/aifrush_shizu_bot?ref={ref_id}">Попробуй сделать свою SHIZU</a>'
+    return f'Ваше анимированное фото готово! Вот результат. 🤗\n<a href="https://t.me/aifrush_shizu_bot?start={ref_id}">Попробуй сделать свою SHIZU</a>'
 
 ALIVE_SHIZUFACE_WAIT_PIC_MESSAGE = "Для создания SHIZUFACE, пожалуйста, отправьте мне фотографию. 🖼"
 ALIVE_SHIZU_WORKING = """
