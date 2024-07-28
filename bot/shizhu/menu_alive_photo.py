@@ -1,26 +1,18 @@
 import asyncio
-import logging
-import sys
-import asyncio
-from os import getenv
 
-from aiogram import Bot, Dispatcher, html
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart, StateFilter, Command
-from aiogram.types import Message, ReplyKeyboardMarkup, InlineKeyboardButton, input_file
-from aiogram.fsm.storage.mongo import MongoStorage
-from aiogram.fsm.state import StatesGroup, State
+from aiogram.filters import StateFilter
+from aiogram.types import Message, ReplyKeyboardMarkup, input_file
 from aiogram.fsm.context import FSMContext
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import F
-import motor.motor_asyncio
 
 from bot.shizhu import buttons
 from bot.shizhu.consts import *
 from bot.ai_bot import AiBot
 from bot.shizhu.state import DialogStates
-from bot.utils.string_utils import generate_hex_string
+from storage.storage import s
+
+
+ALIVE_PHOTO_GEN_PRICE = 1
 
 
 async def emulate_request_to_father(chat_id, file):
@@ -76,8 +68,11 @@ async def alive_photo_working(message: Message, state: FSMContext):
     
     if message.video:
         await message.answer(ALIVE_PHOTO_WORKING, parse_mode='HTML', reply_markup=keyboard)
-        data = await state.get_data()
-        data["balance"] = data["balance"] - 1 
+
+        user = await s.get_user_by_id(message.chat.id)
+        user.balance -= ALIVE_PHOTO_GEN_PRICE
+        await s.update_user(user)
+        
         video = message.video
         file_info = await AiBot.bot.get_file(video.file_id)
         downloaded_file = await AiBot.bot.download_file(file_info.file_path)

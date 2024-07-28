@@ -15,4 +15,5 @@ class DialogStates(StatesGroup):
     waiting_for_alive_photo_pic = State()
     waiting_for_alive_photo_video = State()
     waiting_for_alive_photo_working = State()
+    waiting_for_shizu_photo_working = State()
     main_menu = State()
