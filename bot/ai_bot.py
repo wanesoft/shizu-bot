@@ -1,22 +1,13 @@
-import asyncio
-import logging
-import sys
-import asyncio
 from os import getenv
 
-from aiogram import Bot, Dispatcher, html
+from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart, StateFilter, Command
-from aiogram.types import Message, ReplyKeyboardMarkup, InlineKeyboardButton, input_file
-from aiogram.fsm.storage.mongo import MongoStorage
-from aiogram.fsm.state import StatesGroup, State
-from aiogram.fsm.context import FSMContext
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.filters import Command
 from aiogram import F
-import motor.motor_asyncio
 
 from storage.storage import Storage
+from bot.shizhu import payment
 
 
 TOKEN = getenv("BOT_TOKEN")
@@ -45,8 +36,13 @@ class AiBot:
         )
         from bot.shizhu.menu_balance import (
             command_balance_handler,
+            command_payment_gens,
         )
         from bot.shizhu.menu_shizu_photo import (
             command_shizu_photo_handler,
         )
+        self.dp.message.register(payment.send_invoice_handler, Command(commands="donate"))
+        self.dp.pre_checkout_query.register(payment.pre_checkout_handler)
+        self.dp.message.register(payment.success_payment_handler, F.successful_payment)
+        self.dp.message.register(payment.pay_support_handler, Command(commands="paysupport"))
         await self.dp.start_polling(self.bot)
